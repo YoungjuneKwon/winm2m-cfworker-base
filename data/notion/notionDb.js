@@ -7,7 +7,7 @@ const notionDataConverter = r => ({
   updatedAt: r.last_edited_time,
   entity: r.properties.entity.title[0].plain_text,
   body: JSON.parse(r.properties.body.rich_text[0].plain_text),
-  owner: r.properties.owner.relation[0].id
+  owner: (r.properties.owner.relation[0] || {}).id
 })
 
 class notionDb extends db {
