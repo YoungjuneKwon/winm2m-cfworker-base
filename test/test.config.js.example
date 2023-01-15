@@ -1,0 +1,12 @@
+export default {
+  prefix: 'http://localhost:8080',
+  sampleUser: {
+    email: 'hello@world',
+    password: 'password'
+  },
+  kv: {
+    jwt_secret: 'secret',
+    notion_token: 'token',
+    notion_db_title: 'db'
+  }  
+}
