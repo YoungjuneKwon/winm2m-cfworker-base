@@ -56,16 +56,15 @@ const baseController = {
     },
     '/get': async (req, env) => {
       if (!isPost(req)) return e404()
-      const { id } = JSON.parse(await req.text())
-      const user = getUserObject(req)
-      if ((await db.get(id)).owner !== user.id) return new Response('Unauthorized', { status: 401 })
+      const { entity, id } = JSON.parse(await req.text())
+      if (blockedEntities.includes(entity)) return new Response('Unauthorized', { status: 401 })
       return new Response(JSON.stringify(await db.get(id)))
     },  
-    '/delete': async (req, env) => {
+    '/delete': async (req, env, force) => {
       if (!isPost(req)) return e404()
       const { id } = JSON.parse(await req.text())
       const user = getUserObject(req)
-      if ((await db.get(id)).owner !== user.id) return new Response('Unauthorized', { status: 401 })
+      if ((await db.get(id)).owner !== user.id && !(force || false)) return new Response('Unauthorized', { status: 401 })
       return new Response(JSON.stringify(await db.delete(id)))
     }    
   },
