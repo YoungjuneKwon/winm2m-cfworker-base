@@ -1,13 +1,10 @@
 {
   "name": "@winm2m/cfworker-base",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A library for creating basic CRUD endpoints for Cloudflare Workers.",
   "main": "index.js",
   "scripts": {
-    "test": "jest --testTimeout=20000 --coverage",
-    "prepare-largedata": "npx -p @babel/core -p @babel/node babel-node --presets @babel/preset-env test/test_largedata.js create-largedata create-largedata",
-    "test-largedata": "npx -p @babel/core -p @babel/node babel-node --presets @babel/preset-env test/test_largedata.js test-largedata",
-    "clear-largedata": "npx -p @babel/core -p @babel/node babel-node --presets @babel/preset-env test/test_largedata.js clear-largedata"
+    "test": "jest --testTimeout=20000 --coverage"
   },
   "keywords": [
     "winm2m",

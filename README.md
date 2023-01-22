@@ -41,3 +41,9 @@ export default {
   fetch: (request, env, ctx) => handler.handleRequest(request, env, ctx)
 }
 ```
+
+### Appendix - command to test largedata
+
+```bash
+$ npx -p @babel/core -p @babel/node babel-node --presets @babel/preset-env test/test_largedata.js create-largedata create-largedata
+```
