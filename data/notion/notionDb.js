@@ -21,12 +21,17 @@ class notionDb extends db {
     this.db = await findDatabase(await kv.get('notion_db_title'))
   }
 
-  async find({entity, contains, owner}) {
+  async find({entity, contains, owner, offset, size}) {
     const query = { filter: { and: [{property: 'entity', title: { contains: entity}}] } }
-    contains.forEach(e => { query.filter.and.push({property: e.key, rich_text: { contains: e.value}}) })
+    if (contains) Object.keys(contains).forEach(k => { query.filter.and.push({property: 'body', rich_text: { contains: `"${k}":"${contains[k]}"`}}) })
     owner && query.filter.and.push({property: 'owner', relation: { contains: owner}})
+    if (size) query.page_size = size
+    if (offset) query.start_cursor = offset
+    console.log(JSON.stringify(query))
     const result = await queryDatabase(this.db.id, query)
-    return result.results.map(notionDataConverter)
+    return {
+      list: result.results.map(notionDataConverter)
+    }
   }
 
   async upsert({entity, body, owner, id}) {

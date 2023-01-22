@@ -4,7 +4,10 @@
   "description": "A library for creating basic CRUD endpoints for Cloudflare Workers.",
   "main": "index.js",
   "scripts": {
-    "test": "jest --testTimeout=20000 --coverage"
+    "test": "jest --testTimeout=20000 --coverage",
+    "prepare-largedata": "npx -p @babel/core -p @babel/node babel-node --presets @babel/preset-env test/test_largedata.js create-largedata create-largedata",
+    "test-largedata": "npx -p @babel/core -p @babel/node babel-node --presets @babel/preset-env test/test_largedata.js test-largedata",
+    "clear-largedata": "npx -p @babel/core -p @babel/node babel-node --presets @babel/preset-env test/test_largedata.js clear-largedata"
   },
   "keywords": [
     "winm2m",
@@ -22,6 +25,7 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "7.20.5",
+    "@babel/node": "^7.20.7",
     "@babel/plugin-transform-modules-commonjs": "7.19.6",
     "@babel/plugin-transform-runtime": "7.19.6",
     "@babel/preset-env": "7.20.2",

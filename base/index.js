@@ -10,7 +10,7 @@ const buildPassword = u => sha256(`${u.email}${u.password}`)
 const sha256 = str => crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)).then(h => Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, '0')).join(''))
 
 const ctx = { jwtSecret: '' }
-const isExistsEmail = email => findOnBody('user', { email }).then(r => r.length > 0)
+const isExistsEmail = email => db.find({entity: 'user', contains: { email }}).then(r => r.list.length > 0)
 const verifyToken = token => jwt.verify(token, ctx.jwtSecret)
 const hasValidToken = req => req.headers.get('authorization') && verifyToken(req.headers.get('authorization'))
 const getUserObject = (req) => {
@@ -18,7 +18,6 @@ const getUserObject = (req) => {
   delete user.iat
   return user
 }
-const findOnBody = (entity, contains, userid) => db.find({entity, contains: Object.keys(contains).map(k => ({key: 'body', value: `"${k}":"${contains[k]}"`})), owner: userid})
 
 const db = new DB()
 const baseController = {
@@ -34,9 +33,9 @@ const baseController = {
       if (!isPost(req)) return e404()
       const obj = JSON.parse(await req.text())
       obj.password = await buildPassword(obj)
-      const result = await findOnBody('user', obj)
-      if (result.length === 0) return new Response('Not found', { status: 404 })
-      const token = await jwt.sign({ id: result[0].id, email: obj.email }, await env.kv.get('jwt_secret'))
+      const result = await db.find({entity: 'user', contains: obj})
+      if (result.list.length === 0) return new Response('Not found', { status: 404 })
+      const token = await jwt.sign({ id: result.list[0].id, email: obj.email }, await env.kv.get('jwt_secret'))
       return new Response(JSON.stringify({token}))
     },
     '/upsert': async (req, env) => {
@@ -49,10 +48,10 @@ const baseController = {
     },
     '/find': async (req, env) => {
       if (!isPost(req)) return e404()
-      const { entity, contains } = JSON.parse(await req.text())
+      const { entity, contains, offset, size, order } = JSON.parse(await req.text())
       if (blockedEntities.includes(entity)) return new Response('Unauthorized', { status: 401 })
       const user = getUserObject(req)
-      return new Response(JSON.stringify(await findOnBody(entity, contains, user.id)))
+      return new Response(JSON.stringify(await db.find({entity, contains, owner: user.id, offset, size, order})))
     },
     '/get': async (req, env) => {
       if (!isPost(req)) return e404()

@@ -28,23 +28,14 @@ const post = async (uri, body, token, force) => {
 }
 
 describe("Base controller", () => {
-  let user, sampleContent, res, token
+  let user, sampleContent, res, token, pageContents
 
   beforeAll(async () => {
     await baseController.install({ kv })
   })
 
-  afterAll(async () => {
-    await post('/delete', { id: sampleContent.id }, token)
-    await post('/delete', { id: user.id }, token, true)
-  })
-
-  it("regist", async () => {
-    user = await post('/open/regist', config.sampleUser)
-    expect(user.id).toBeTruthy()
-  })
-
   it("login", async () => {
+    await postRaw('/open/regist', config.sampleUser)
     res = await post('/open/login', config.sampleUser)
     token = res.token
     expect(token).toBeTruthy()  
@@ -61,7 +52,7 @@ describe("Base controller", () => {
     res = await post('/get', { id: sampleContent.id }, token)
     expect(res.body.hello).toBe('world2')
     res = await post('/find', { entity: res.entity, contains: {hello: 'world2'}}, token)
-    expect(res.length).toBe(1)
+    expect(res.list.length).toBe(1)
   })
 
   it("Invalid methods", async () => {
@@ -87,5 +78,23 @@ describe("Base controller", () => {
       expect(res.status).toBe(401)
     }
   })
+
+  it("Paging result of find", async () => {    
+    pageContents = []
+    for (let i = 0; i < 5; i++) {
+      pageContents.push(await post('/upsert', { entity: 'sample', body: JSON.stringify({ hello: 'page', idx: i}) }, token))
+    }
+    res = await post('/find', { entity: 'sample', contains: {hello: 'page'}, size: 2, order: {idx: 'asc'}}, token)
+    expect(res.list.length).toBe(2)
+    expect(res.list[0].body.idx).toBe(4)
+    expect(res.list[1].body.idx).toBe(3)
+  })
+
+  afterAll(async () => {
+    for (const c of pageContents) {
+      await post('/delete', { id: c.id }, token)
+    }    
+    await post('/delete', { id: sampleContent.id }, token)
+  })  
 })
 
