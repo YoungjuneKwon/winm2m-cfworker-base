@@ -48,10 +48,10 @@ const baseController = {
     },
     '/find': async (req, env) => {
       if (!isPost(req)) return e404()
-      const { entity, contains, offset, size, order } = JSON.parse(await req.text())
+      const { entity, contains, offset, size, sort } = JSON.parse(await req.text())
       if (blockedEntities.includes(entity)) return new Response('Unauthorized', { status: 401 })
       const user = getUserObject(req)
-      return new Response(JSON.stringify(await db.find({entity, contains, owner: user.id, offset, size, order})))
+      return new Response(JSON.stringify(await db.find({entity, contains, owner: user.id, offset, size, sort})))
     },
     '/get': async (req, env) => {
       if (!isPost(req)) return e404()

@@ -84,10 +84,18 @@ describe("Base controller", () => {
     for (let i = 0; i < 5; i++) {
       pageContents.push(await post('/upsert', { entity: 'sample', body: JSON.stringify({ hello: 'page', idx: i}) }, token))
     }
-    res = await post('/find', { entity: 'sample', contains: {hello: 'page'}, size: 2, order: {idx: 'asc'}}, token)
+    res = await post('/find', { entity: 'sample', contains: {hello: 'page'}, size: 2, sort: {direction: 'dec'}}, token)
     expect(res.list.length).toBe(2)
     expect(res.list[0].body.idx).toBe(4)
     expect(res.list[1].body.idx).toBe(3)
+    res = await post('/find', { entity: 'sample', contains: {hello: 'page'}, size: 2, offset: res.offset, sort: {direction: 'dec'}}, token)
+    expect(res.list.length).toBe(2)
+    expect(res.list[0].body.idx).toBe(2)
+    expect(res.list[1].body.idx).toBe(1)
+    res = await post('/find', { entity: 'sample', contains: {hello: 'page'}, size: 2, sort: {direction: 'asc'}}, token)
+    expect(res.list.length).toBe(2)
+    expect(res.list[0].body.idx).toBe(0)
+    expect(res.list[1].body.idx).toBe(1)    
   })
 
   afterAll(async () => {

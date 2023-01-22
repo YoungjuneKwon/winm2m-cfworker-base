@@ -21,16 +21,17 @@ class notionDb extends db {
     this.db = await findDatabase(await kv.get('notion_db_title'))
   }
 
-  async find({entity, contains, owner, offset, size}) {
+  async find({entity, contains, owner, offset, size, sort}) {
     const query = { filter: { and: [{property: 'entity', title: { contains: entity}}] } }
     if (contains) Object.keys(contains).forEach(k => { query.filter.and.push({property: 'body', rich_text: { contains: `"${k}":"${contains[k]}"`}}) })
     owner && query.filter.and.push({property: 'owner', relation: { contains: owner}})
     if (size) query.page_size = size
     if (offset) query.start_cursor = offset
-    console.log(JSON.stringify(query))
+    if (sort) query.sort = { timestamp: 'last_edited_time', direction: (sort.direction || 'asc') === 'asc' ? 'ascending' : 'descending'}
     const result = await queryDatabase(this.db.id, query)
     return {
-      list: result.results.map(notionDataConverter)
+      list: result.results.map(notionDataConverter),
+      offset: result.next_cursor
     }
   }
 
